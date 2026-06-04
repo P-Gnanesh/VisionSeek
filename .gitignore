@@ -1,0 +1,10 @@
+venv_gpu/
+__pycache__/
+.vscode/
+flask_session/
+
+*.pyc
+*.pyo
+*.pyd
+
+.env

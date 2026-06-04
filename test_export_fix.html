@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Export Fix</title>
+</head>
+<body>
+<script>
+// Simulate the fix
+let currentMainResults = [];
+const mainResultsGrid = document.createElement("div");
+mainResultsGrid.id = "mainResultsGrid";
+
+// Simulate initial server-rendered results
+const card1 = document.createElement("article");
+card1.setAttribute("data-image-path", "/dataset/image1.jpg");
+mainResultsGrid.appendChild(card1);
+
+const card2 = document.createElement("article");
+card2.setAttribute("data-image-path", "/dataset/image2.jpg");
+mainResultsGrid.appendChild(card2);
+
+// Test the initialization function
+function initializeCurrentResults() {
+    const cards = mainResultsGrid?.querySelectorAll("article[data-image-path]");
+    if (cards && cards.length > 0) {
+        currentMainResults = Array.from(cards).map((card) => ({
+            image_path: card.dataset.imagePath || "",
+            score: 0,
+        }));
+    }
+}
+
+// Run initialization
+initializeCurrentResults();
+
+// Test export logic
+if (!Array.isArray(currentMainResults) || currentMainResults.length === 0) {
+    console.log("❌ FAIL: No results to export");
+} else {
+    console.log("✅ PASS: Export has", currentMainResults.length, "results");
+    console.log("Results:", currentMainResults);
+}
+</script>
+</body>
+</html>

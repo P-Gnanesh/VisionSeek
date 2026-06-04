@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionSeek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           CSS VARIABLES - Global Design Tokens
+           ======================================== */
+        :root {
+            --color-bg: #080c14;
+            --color-surface: #0d1424;
+            --color-surface-2: #111b30;
+            --color-border: rgba(99, 179, 237, 0.12);
+            --color-accent: #00d4ff;
+            --color-accent-2: #7c3aed;
+            --color-accent-gradient: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+            --color-text: #f0f6ff;
+            --color-text-muted: #8ba3c4;
+            --color-success: #10b981;
+            --color-danger: #ef4444;
+            
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-size-base: 15px;
+            --line-height-base: 1.65;
+        }
+
+        /* ========================================
+           GLOBAL RESET & BASE STYLES
+           ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: var(--font-size-base);
+        }
+
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-base);
+            color: var(--color-text);
+            background-color: var(--color-bg);
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 28%),
+                radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.18), transparent 24%),
+                linear-gradient(135deg, var(--color-bg) 0%, #0b1729 45%, #111827 100%);
+        }
+
+        /* ========================================
+           SCROLLBAR STYLING
+           ======================================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: var(--color-surface);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 212, 255, 0.4);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 212, 255, 0.6);
+        }
+
+        /* Firefox scrollbar */
+        * {
+            scrollbar-color: rgba(0, 212, 255, 0.4) var(--color-surface);
+            scrollbar-width: thin;
+        }
+
+        /* ========================================
+           TEXT SELECTION
+           ======================================== */
+        ::selection {
+            background-color: rgba(0, 212, 255, 0.3);
+            color: var(--color-text);
+        }
+
+        ::-moz-selection {
+            background-color: rgba(0, 212, 255, 0.3);
+            color: var(--color-text);
+        }
+
+        /* ========================================
+           COMPONENT STYLES
+           ======================================== */
+        .glass {
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .result-card {
+            transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.28);
+        }
+
+        .favorite-btn svg {
+            transition: fill 140ms ease, stroke 140ms ease, transform 140ms ease;
+        }
+
+        .favorite-btn:hover svg {
+            transform: translateY(-1px);
+        }
+
+        .favorite-btn[data-favorite="true"] svg {
+            fill: rgb(34 211 238);
+            stroke: rgb(34 211 238);
+        }
+
+        .favorite-btn[data-favorite="false"] svg {
+            fill: transparent;
+            stroke: rgb(148 163 184);
+        }
+
+        .feedback-btn {
+            transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+        }
+
+        .feedback-btn[data-selected="true"][data-feedback="relevant"] {
+            background-color: rgba(34, 197, 94, 0.25);
+            border-color: rgba(34, 197, 94, 0.8);
+            color: rgb(187, 247, 208);
+        }
+
+        .feedback-btn[data-selected="true"][data-feedback="irrelevant"] {
+            background-color: rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.8);
+            color: rgb(254, 202, 202);
+        }
+
+        .view-toggle {
+            background-color: transparent;
+            color: rgb(148 163 184);
+            border: 1px solid transparent;
+            transition: all 140ms ease;
+        }
+
+        .view-toggle:hover {
+            color: rgb(226 232 240);
+            background-color: rgba(100, 116, 139, 0.2);
+        }
+
+        .view-toggle.active {
+            background-color: rgba(34, 211, 238, 0.15);
+            color: rgb(34 211 238);
+            border-color: rgba(34, 211, 238, 0.5);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            animation: slideIn 300ms ease;
+            pointer-events: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ========================================
+           ANIMATION KEYFRAMES
+           ======================================== */
+        @media (prefers-reduced-motion: no-preference) {
+            /* Page Load - Hero Section */
+            @keyframes fadeUpHeading {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes fadeUpSubtle {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Results Cards Stagger */
+            @keyframes cardFadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Floating Orbs Background */
+            @keyframes floatOrb1 {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(20px, -15px); }
+                50% { transform: translate(10px, 20px); }
+                75% { transform: translate(-20px, 15px); }
+                100% { transform: translate(0, 0); }
+            }
+
+            @keyframes floatOrb2 {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-25px, 20px); }
+                50% { transform: translate(-15px, -20px); }
+                75% { transform: translate(25px, -15px); }
+                100% { transform: translate(0, 0); }
+            }
+
+            @keyframes floatOrb3 {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(15px, 25px); }
+                50% { transform: translate(-20px, 10px); }
+                75% { transform: translate(20px, -25px); }
+                100% { transform: translate(0, 0); }
+            }
+
+            /* Search Button Loader */
+            @keyframes spinLoader {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
+            @keyframes checkmarkFlash {
+                0% { opacity: 0; transform: scale(0.8); }
+                50% { opacity: 1; transform: scale(1); }
+                100% { opacity: 0; transform: scale(1.1); }
+            }
+
+            /* Re-search Button Pulse Glow */
+            @keyframes pulseGlow {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4);
+                }
+                50% {
+                    box-shadow: 0 0 20px 10px rgba(0, 212, 255, 0.4);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4);
+                }
+            }
+
+            /* Bookmark Scale Bounce */
+            @keyframes bookmarkBounce {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.4); }
+                100% { transform: scale(1); }
+            }
+
+            /* Category Pill Slide Background */
+            @keyframes pillSlideBackground {
+                0% { transform: translateX(0); }
+                100% { transform: translateX(var(--slide-distance, 0)); }
+            }
+        }
+
+        /* ========================================
+           NAVBAR STYLING
+           ======================================== */
+        nav.navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(8, 12, 20, 0);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            border-bottom: 1px solid transparent;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease;
+        }
+
+        nav.navbar.scrolled {
+            background: rgba(8, 12, 20, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .navbar .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-text);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-container {
+            width: 100%;
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            background: transparent;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 300ms ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--color-text);
+            background: rgba(139, 163, 196, 0.1);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--color-accent-gradient);
+            transform: translateX(-50%);
+            transition: width 300ms ease;
+        }
+
+        .nav-link:hover::after {
+            width: 70%;
+        }
+
+        .nav-link.active {
+            color: var(--color-accent);
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), rgba(124, 58, 237, 0.08));
+            border-image: var(--color-accent-gradient) 1;
+        }
+
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        /* Add top padding to main content for fixed navbar */
+        body {
+            padding-top: 64px;
+        }
+
+        /* ========================================
+           HERO SECTION STYLING
+           ======================================== */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: 
+                radial-gradient(ellipse at 30% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 60%);
+            margin-top: -64px;
+            padding: 64px 2rem 3rem;
+        }
+
+        /* Animated grid pattern overlay */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(0deg, transparent 24%, rgba(0, 212, 255, 0.05) 25%, rgba(0, 212, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 212, 255, 0.05) 75%, rgba(0, 212, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 212, 255, 0.05) 25%, rgba(0, 212, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 212, 255, 0.05) 75%, rgba(0, 212, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            opacity: 0.3;
+            animation: gridShift 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridShift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 52rem;
+            margin-bottom: 3rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-accent);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero-heading {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            background: var(--color-accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 640px) {
+            .hero-heading {
+                font-size: 2.5rem;
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--color-text-muted);
+            line-height: 1.8;
+        }
+
+        /* Animation States for Hero Elements */
+        @media (prefers-reduced-motion: no-preference) {
+            .hero-heading.animate {
+                animation: fadeUpHeading 0.7s ease-out both;
+            }
+
+            .hero-subtitle.animate {
+                animation: fadeUpSubtle 0.6s ease-out both;
+                animation-delay: 100ms;
+            }
+
+            .hero-badge.animate {
+                animation: fadeUpSubtle 0.6s ease-out both;
+            }
+
+            .hero-search-form.animate {
+                animation: fadeUpSubtle 0.6s ease-out both;
+                animation-delay: 200ms;
+            }
+        }
+
+        /* Result Cards Animation */
+        @media (prefers-reduced-motion: no-preference) {
+            .result-card.animate {
+                animation: cardFadeUp 0.4s ease-out both;
+            }
+
+            .result-card.animate-delay-1 { animation-delay: 80ms; }
+            .result-card.animate-delay-2 { animation-delay: 160ms; }
+            .result-card.animate-delay-3 { animation-delay: 240ms; }
+            .result-card.animate-delay-4 { animation-delay: 320ms; }
+            .result-card.animate-delay-5 { animation-delay: 400ms; }
+            .result-card.animate-delay-6 { animation-delay: 480ms; }
+            .result-card.animate-delay-7 { animation-delay: 560ms; }
+            .result-card.animate-delay-8 { animation-delay: 640ms; }
+            .result-card.animate-delay-9 { animation-delay: 720ms; }
+            .result-card.animate-delay-10 { animation-delay: 800ms; }
+        }
+
+        /* Floating Orbs */
+        .floating-orb {
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+            .floating-orb-1 {
+                animation: floatOrb1 10s ease-in-out infinite;
+            }
+
+            .floating-orb-2 {
+                animation: floatOrb2 12s ease-in-out infinite;
+            }
+
+            .floating-orb-3 {
+                animation: floatOrb3 8s ease-in-out infinite;
+            }
+        }
+
+        /* Search Button Loading State */
+        @media (prefers-reduced-motion: no-preference) {
+            .btn-primary.loading::after {
+                content: '';
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                margin-left: 8px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top-color: var(--color-accent);
+                border-radius: 50%;
+                animation: spinLoader 0.7s linear infinite;
+                vertical-align: middle;
+            }
+
+            .btn-primary.loading {
+                pointer-events: none;
+                opacity: 0.8;
+            }
+
+            .btn-primary.success::after {
+                content: '✓';
+                display: inline-block;
+                margin-left: 8px;
+                color: var(--color-success);
+                animation: checkmarkFlash 0.6s ease-out;
+            }
+        }
+
+        /* Re-search Button Pulse */
+        @media (prefers-reduced-motion: no-preference) {
+            .btn-primary.pulse-glow {
+                animation: pulseGlow 2s ease-in-out infinite;
+            }
+        }
+
+        /* Bookmark Scale Animation */
+        @media (prefers-reduced-motion: no-preference) {
+            .favorite-btn.bounce {
+                animation: bookmarkBounce 0.3s ease-out;
+            }
+        }
+
+        /* ========================================
+           SEARCH FORM STYLING
+           ======================================== */
+        .hero-search-form {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 52rem;
+            display: grid;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(13, 20, 36, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-row {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr auto;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .form-input,
+        .form-file {
+            height: 56px;
+            padding: 0 1.5rem;
+            border-radius: 9999px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            font-size: 0.9375rem;
+            font-family: var(--font-family);
+            transition: all 200ms ease;
+        }
+
+        .form-input::placeholder {
+            color: var(--color-text-muted);
+        }
+
+        .form-input:focus,
+        .form-file:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            background: rgba(13, 20, 36, 0.95);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+        }
+
+        .form-file {
+            padding: 0 1rem;
+        }
+
+        .form-file::file-selector-button {
+            background: var(--color-accent-gradient);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            margin-right: 0.75rem;
+            transition: all 200ms ease;
+        }
+
+        .form-file::file-selector-button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            height: 56px;
+            padding: 0 2rem;
+            border-radius: 9999px;
+            background: var(--color-accent);
+            color: rgba(8, 12, 20, 0.9);
+            border: none;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 200ms ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-secondary {
+            height: 56px;
+            padding: 0 2rem;
+            border-radius: 9999px;
+            background: transparent;
+            color: var(--color-text-muted);
+            border: 1px solid var(--color-border);
+            font-weight: 600;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(139, 163, 196, 0.1);
+            color: var(--color-text);
+            border-color: rgba(139, 163, 196, 0.3);
+        }
+
+        /* ========================================
+           MULTIMODAL SECTION STYLING
+           ======================================== */
+        .multimodal-card {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 52rem;
+            margin-top: 2.5rem;
+            padding: 2rem;
+            background: rgba(13, 20, 36, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            border: 1px solid var(--color-border);
+            border-top: 3px solid;
+            border-top-image: var(--color-accent-gradient);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .multimodal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-accent-gradient);
+            border-radius: 1.5rem 1.5rem 0 0;
+        }
+
+        .multimodal-header {
+            margin-bottom: 1rem;
+        }
+
+        .multimodal-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+        }
+
+        .multimodal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-text);
+            margin-top: 0.5rem;
+        }
+
+        .multimodal-description {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .multimodal-form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            grid-template-columns: 1fr 1fr auto;
+        }
+
+        @media (max-width: 1024px) {
+            .multimodal-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .multimodal-form .form-group {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .multimodal-form .btn-primary {
+            align-self: flex-end;
+        }
+
+        /* ========================================
+           RESULTS TOOLBAR STYLING
+           ======================================== */
+        .results-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding: 1.25rem;
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            border-top: 3px solid;
+            border-top-image: var(--color-accent-gradient);
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .results-toolbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-accent-gradient);
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .results-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .results-count-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            background: var(--color-accent);
+            color: rgba(8, 12, 20, 0.9);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .mark-relevant-toggle {
+            padding: 0.625rem 1.25rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 300ms ease;
+        }
+
+        .mark-relevant-toggle.off {
+            background: transparent;
+            color: var(--color-text-muted);
+            border: 1px solid rgba(139, 163, 196, 0.3);
+        }
+
+        .mark-relevant-toggle.off:hover {
+            background: rgba(139, 163, 196, 0.1);
+            color: var(--color-text);
+            border-color: rgba(139, 163, 196, 0.5);
+        }
+
+        .mark-relevant-toggle.on {
+            background: var(--color-accent);
+            color: rgba(8, 12, 20, 0.9);
+            border: 1px solid var(--color-accent);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .re-search-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 9999px;
+            background: var(--color-accent-gradient);
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 300ms ease;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .re-search-btn:hover:not(:disabled) {
+            box-shadow: 0 6px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        .re-search-btn.has-feedback {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+            }
+            50% {
+                box-shadow: 0 8px 35px rgba(0, 212, 255, 0.5);
+            }
+        }
+
+        .re-search-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ========================================
+           CATEGORY FILTER PILLS
+           ======================================== */
+        .category-filter-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(13, 20, 36, 0.6);
+            border: 1px solid var(--color-border);
+            border-radius: 1rem;
+        }
+
+        .category-filter-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .category-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .category-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid var(--color-border);
+            background: rgba(13, 20, 36, 0.8);
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 300ms ease;
+        }
+
+        .category-pill:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .category-pill.active {
+            background: var(--color-accent-gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* ========================================
+           IMAGE CARD REDESIGN
+           ======================================== */
+        .result-card {
+            position: relative;
+            overflow: hidden;
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            border-radius: 1rem;
+            transition: all 300ms ease;
+        }
+
+        .result-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.3), 0 8px 32px rgba(0, 212, 255, 0.1);
+        }
+
+        .card-image-container {
+            position: relative;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .card-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 300ms ease;
+        }
+
+        .result-card:hover .card-image-container img {
+            transform: scale(1.05);
+        }
+
+        .similarity-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.5rem 0.875rem;
+            border-radius: 9999px;
+            background: var(--color-accent-gradient);
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            z-index: 10;
+        }
+
+        .bookmark-btn-container {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 300ms ease;
+            z-index: 15;
+        }
+
+        .result-card:hover .bookmark-btn-container {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .favorite-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            width: 36px;
+            border-radius: 50%;
+            background: rgba(8, 12, 20, 0.9);
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: all 200ms ease;
+        }
+
+        .favorite-btn:hover {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .favorite-btn[data-favorite="true"] {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
+        }
+
+        .card-content {
+            padding: 1rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .similarity-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .similarity-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+        }
+
+        .similarity-value {
+            font-size: 1.375rem;
+            font-weight: 700;
+            background: var(--color-accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .similarity-match-label {
+            font-size: 0.6875rem;
+            color: var(--color-text-muted);
+            font-weight: 500;
+        }
+
+        .card-path {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            truncate: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feedback-controls {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 0.75rem;
+        }
+
+        .feedback-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--color-border);
+            background: transparent;
+            color: var(--color-text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 200ms ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback-btn:hover:not([data-selected="true"]) {
+            border-color: rgba(139, 163, 196, 0.5);
+            color: var(--color-text);
+            background: rgba(139, 163, 196, 0.1);
+        }
+
+        .feedback-btn[data-feedback="relevant"][data-selected="true"] {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--color-success);
+            color: var(--color-success);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .feedback-btn[data-feedback="irrelevant"][data-selected="true"] {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* ========================================
+           BOTTOM ACTION BUTTONS
+           ======================================== */
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-btn {
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid var(--color-accent-gradient);
+            background: transparent;
+            color: var(--color-text);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 300ms ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-accent-gradient);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 300ms ease;
+        }
+
+        .action-btn:hover::before {
+            opacity: 0.15;
+        }
+
+        .action-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        /* ========================================
+           STEP 6 - TOAST REDESIGN
+           ======================================== */
+        .toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            min-width: 260px;
+            max-width: 360px;
+            padding: 0.875rem 1rem;
+            border-radius: 0.75rem;
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 300ms ease;
+            pointer-events: auto;
+        }
+
+        .toast::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--toast-color, var(--color-accent));
+            animation: toastProgress var(--toast-duration, 3s) linear forwards;
+            border-radius: 0 0 0.75rem 0.75rem;
+        }
+
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--toast-color, var(--color-accent));
+            color: rgba(8,12,20,0.9);
+        }
+
+        .toast-left-border {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--toast-color, var(--color-accent));
+            border-radius: 0.75rem 0 0 0.75rem;
+        }
+
+        /* ========================================
+           STEP 6 - ADMIN PANEL DARK THEME
+           ======================================== */
+        .admin-panel-card {
+            background: var(--color-surface-2);
+            border: 1px solid var(--color-border);
+            border-top: 3px solid transparent;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .admin-panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--color-accent-gradient);
+        }
+
+        .admin-panel-summary {
+            padding: 1rem 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .admin-panel-summary::-webkit-details-marker { display: none; }
+
+        .admin-panel-summary::after {
+            content: '▾';
+            margin-left: auto;
+            color: var(--color-text-muted);
+            transition: transform 200ms ease;
+        }
+
+        details[open] .admin-panel-summary::after {
+            transform: rotate(180deg);
+        }
+
+        .admin-panel-body {
+            padding: 1.25rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .admin-file-drop {
+            border: 2px dashed rgba(0,212,255,0.3);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            background: rgba(0,212,255,0.03);
+            transition: border-color 200ms ease;
+        }
+
+        .admin-file-drop:hover {
+            border-color: rgba(0,212,255,0.5);
+        }
+
+        /* ========================================
+           STEP 6 - RELEVANT/IRRELEVANT PILLS
+           ======================================== */
+        #refineSummary {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* ========================================
+           STEP 6 - RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .hero-heading { font-size: 2.25rem !important; }
+            #mainResultsGrid { grid-template-columns: 1fr !important; }
+            .navbar-nav { gap: 0.5rem; }
+            .nav-link { padding: 0.375rem 0.875rem; font-size: 0.8125rem; }
+            .results-toolbar { flex-direction: column; align-items: flex-start; }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+            #mainResultsGrid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+
+        /* ========================================
+           STEP 6 - FOOTER
+           ======================================== */
+        .site-footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--color-text-muted);
+            font-size: 0.8125rem;
+            border-top: 1px solid var(--color-border);
+            margin-top: 3rem;
+            background: linear-gradient(to top, rgba(0,212,255,0.03), transparent);
+        }
+
+        .site-footer span {
+            background: var(--color-accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen text-slate-100">
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">VisionSeek</div>
+            <div class="navbar-nav">
+                <button id="searchViewBtn" type="button" class="nav-link active" data-view="search">Search</button>
+                <button id="favoritesViewBtn" type="button" class="nav-link" data-view="favorites">Favourites</button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="searchView" class="hero-section">
+            <!-- Floating background orbs -->
+            <div class="floating-orb floating-orb-1" style="width: 300px; height: 300px; top: 10%; left: 5%; background: rgba(0, 212, 255, 0.3);"></div>
+            <div class="floating-orb floating-orb-2" style="width: 250px; height: 250px; bottom: 15%; right: 10%; background: rgba(124, 58, 237, 0.2);"></div>
+            <div class="floating-orb floating-orb-3" style="width: 200px; height: 200px; top: 50%; right: 5%; background: rgba(0, 212, 255, 0.2);"></div>
+
+            <div class="hero-content">
+                <div class="hero-badge">
+                    OpenCLIP + FAISS
+                </div>
+                <h1 class="hero-heading">VisionSeek</h1>
+                <p class="hero-subtitle">Search your image library with text prompts or an uploaded reference image.</p>
+            </div>
+
+            <form id="searchForm" method="POST" enctype="multipart/form-data" class="hero-search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="queryInput" class="form-label">Text query</label>
+                        <input
+                            id="queryInput"
+                            type="text"
+                            name="query"
+                            value="{{ query }}"
+                            placeholder="Describe what you want to find, for example: red car on a road"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="uploadImageInput" class="form-label">Upload image</label>
+                        <input
+                            id="uploadImageInput"
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            class="form-file"
+                        >
+                    </div>
+                </div>
+
+                <div class="flex items-end gap-3 sm:flex-col sm:justify-end">
+                    <button type="submit" class="btn-primary">Search</button>
+                    <button type="button" id="clearBtn" class="btn-secondary">Clear</button>
+                </div>
+            </form>
+
+            <div class="multimodal-card">
+                <div class="multimodal-header">
+                    <div class="multimodal-badge">Multi-modal Search</div>
+                    <h2 class="multimodal-title">Blend text and image cues</h2>
+                    <p class="multimodal-description">Submit a prompt and an uploaded image together to search with the combined embedding.</p>
+                </div>
+
+                <form id="multimodalForm" method="POST" action="/search/multimodal" enctype="multimodal/form-data" class="multimodal-form">
+                    <div class="form-group">
+                        <label for="multimodalQueryInput" class="form-label">Text query</label>
+                        <input
+                            id="multimodalQueryInput"
+                            type="text"
+                            name="query_text"
+                            placeholder="Describe what you want to find, for example: a bright red sports car"
+                            class="form-input"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="multimodalFileInput" class="form-label">Upload image</label>
+                        <input
+                            id="multimodalFileInput"
+                            type="file"
+                            name="query_image"
+                            accept="image/*"
+                            class="form-file"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary">Search</button>
+                </form>
+
+                <div id="multimodalStatus" class="mt-4 hidden rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100"></div>
+
+                <section class="mt-6">
+                    <div class="mb-4 flex items-center justify-between gap-4">
+                        <h3 class="text-lg font-semibold text-white">Multi-modal Results</h3>
+                        <p id="multimodalCount" class="text-sm text-slate-400"></p>
+                    </div>
+
+                    <div id="multimodalResultsEmpty" class="rounded-3xl border border-white/10 bg-white/5 px-6 py-10 text-center text-slate-300">
+                        <p class="text-base">Submit a text prompt and image to see blended matches here.</p>
+                    </div>
+
+                    <div id="multimodalResultsGrid" class="hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"></div>
+                </section>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="mx-auto flex w-full max-w-7xl flex-col px-4 py-10 sm:px-6 lg:px-8">
+                {% if results %}
+                <!-- Results Toolbar -->
+                <div class="results-toolbar">
+                    <h2 class="results-title">Results</h2>
+                    <div class="toolbar-actions">
+                        <span class="results-count-badge" id="mainResultsCount">{{ results|length }} matches</span>
+                        <button id="refineToggleBtn" type="button" class="mark-relevant-toggle off">Mark Relevant Images: Off</button>
+                        <button id="reSearchBtn" type="button" class="re-search-btn" disabled>Re-search</button>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="category-filter-section">
+                    <label class="category-filter-label">Filter by category</label>
+                    <div class="category-pills-container" id="categoryFilterRow"></div>
+                </div>
+
+                <div id="refineSummary" class="mb-4 text-sm text-slate-300">Relevant: 0 | Irrelevant: 0</div>
+                <div id="refineStatus" class="mb-4 hidden rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100"></div>
+
+                <!-- Results Grid -->
+                <div id="mainResultsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                    {% for item in results %}
+                    <article class="result-card" data-image-path="{{ item.image_path|e }}">
+                        <div class="card-image-container">
+                            <a href="{{ item.image_url }}" target="_blank" rel="noreferrer">
+                                <img src="{{ item.image_url }}" alt="Search result" onerror="this.src='/placeholder.png'">
+                            </a>
+                            <div class="similarity-badge">{{ item.score_percent }}</div>
+                            <div class="bookmark-btn-container">
+                                <button
+                                    type="button"
+                                    class="favorite-btn"
+                                    data-image-path="{{ item.image_path|e }}"
+                                    data-favorite="{{ 'true' if item.is_favorite else 'false' }}"
+                                    aria-label="Toggle favorite"
+                                    title="Toggle favorite"
+                                >
+                                    <svg viewBox="0 0 24 24" class="h-5 w-5" stroke-width="1.5" aria-hidden="true">
+                                        <path d="M6 3.75A2.25 2.25 0 0 1 8.25 1.5h7.5A2.25 2.25 0 0 1 18 3.75v18l-6-4.5-6 4.5v-18Z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="similarity-section">
+                                <div>
+                                    <div class="similarity-label">Similarity</div>
+                                    <div class="similarity-value">{{ item.score_percent }}</div>
+                                    <div class="similarity-match-label">match</div>
+                                </div>
+                            </div>
+                            <p class="card-path" title="{{ item.image_path }}">{{ item.image_path }}</p>
+                            <div class="feedback-controls hidden">
+                                <button type="button" class="feedback-btn" data-feedback="relevant" data-selected="false" aria-label="Mark relevant" title="Mark relevant">👍</button>
+                                <button type="button" class="feedback-btn" data-feedback="irrelevant" data-selected="false" aria-label="Mark irrelevant" title="Mark irrelevant">👎</button>
+                            </div>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-bar">
+                    <button id="downloadZipBtn" type="button" class="action-btn">Download ZIP</button>
+                    <button id="exportJsonBtn" type="button" class="action-btn">Export JSON</button>
+                </div>
+                {% else %}
+                <div class="mx-auto mt-10 max-w-2xl rounded-3xl border border-white/10 bg-white/5 px-6 py-14 text-center text-slate-300">
+                    <p class="text-4xl">🔎</p>
+                    <p class="mt-4 text-base">Search by text or upload an image to see the top matches here.</p>
+                </div>
+                {% endif %}
+            </section>
+
+            <section class="mt-12">
+                <details class="mx-auto max-w-4xl admin-panel-card">
+                    <summary class="admin-panel-summary">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--color-accent);box-shadow:0 0 8px rgba(0,212,255,0.5);"></span>
+                        Admin Panel
+                    </summary>
+
+                    <div class="admin-panel-body">
+                        <p style="margin-bottom:1.25rem;font-size:0.875rem;color:var(--color-text-muted);">Upload one or more images and update the search index incrementally.</p>
+
+                        <form id="adminUploadForm" class="grid gap-4 sm:grid-cols-2">
+                            <label class="grid gap-2 sm:col-span-2">
+                                <span style="font-size:0.875rem;font-weight:600;color:var(--color-text);">Select images</span>
+                                <div class="admin-file-drop">
+                                    <input
+                                        id="adminImagesInput"
+                                        type="file"
+                                        name="images[]"
+                                        accept="image/*"
+                                        multiple
+                                        style="width:100%;cursor:pointer;font-size:0.875rem;color:var(--color-text-muted);"
+                                    >
+                                </div>
+                            </label>
+
+                            <label class="grid gap-2">
+                                <span style="font-size:0.875rem;font-weight:600;color:var(--color-text);">Admin token</span>
+                                <input
+                                    id="adminTokenInput"
+                                    type="text"
+                                    placeholder="Enter admin token"
+                                    class="form-input"
+                                    style="height:48px;"
+                                >
+                            </label>
+
+                            <div style="display:flex;align-items:flex-end;">
+                                <button id="adminUploadBtn" type="submit" class="btn-primary" style="height:48px;padding:0 1.5rem;">Upload Images</button>
+                            </div>
+                        </form>
+
+                        <div id="adminUploadStatus" class="mt-4 hidden rounded-xl border px-4 py-3 text-sm"></div>
+                    </div>
+                </details>
+            </section>
+        </section>
+
+        <!-- Favorites View -->
+        <section id="favoritesView" class="hidden" style="min-height:100vh; padding: 5rem 1.5rem 4rem;">
+            <!-- Page Header -->
+            <div style="text-align:center; margin-bottom:2.5rem;">
+                <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.4rem 1rem; border-radius:9999px; border:1px solid rgba(0,212,255,0.3); background:rgba(0,212,255,0.08); font-size:0.7rem; font-weight:600; letter-spacing:0.18em; text-transform:uppercase; color:var(--color-accent); margin-bottom:1.25rem;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent);box-shadow:0 0 10px rgba(0,212,255,0.6);animation:pulse 2s ease-in-out infinite;display:inline-block;"></span>
+                    Saved Items
+                </div>
+                <h2 style="font-size:clamp(2rem,5vw,3.25rem); font-weight:700; background:var(--color-accent-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:0.75rem; display:flex; align-items:center; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+                    Favourites
+                    <span id="favCount" style="font-size:0.875rem; font-weight:600; padding:0.25rem 0.75rem; border-radius:9999px; background:var(--color-accent); color:rgba(8,12,20,0.9); -webkit-text-fill-color:rgba(8,12,20,0.9);"></span>
+                </h2>
+                <p style="color:var(--color-text-muted); font-size:0.9375rem;">Your bookmarked images are displayed below.</p>
+            </div>
+
+            <!-- Stats Bar -->
+            <div id="favStatsBar" class="hidden" style="max-width:80rem; margin:0 auto 1.25rem; display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1.25rem; background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:0.75rem;">
+                <span id="favStatsText" style="font-size:0.875rem; color:var(--color-text-muted);"></span>
+                <button id="clearAllFavBtn" type="button" style="padding:0.375rem 1rem; border-radius:0.5rem; border:1px solid var(--color-danger); background:transparent; color:var(--color-danger); font-size:0.8125rem; font-weight:600; cursor:pointer; transition:all 200ms ease;" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='transparent'">Clear All</button>
+            </div>
+
+            <div id="favoritesContainer" style="max-width:80rem; margin:0 auto;">
+                <!-- Empty State -->
+                <div id="favoritesEmpty" style="padding:5rem 2rem; text-align:center; border:1px solid var(--color-border); border-radius:1.5rem; background:rgba(13,20,36,0.6);">
+                    <div style="width:64px;height:64px;margin:0 auto 1.25rem;border-radius:50%;background:rgba(0,212,255,0.08);border:2px solid rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;">
+                        <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--color-accent);fill:none;stroke-width:1.5;"><path d="M6 3.75A2.25 2.25 0 0 1 8.25 1.5h7.5A2.25 2.25 0 0 1 18 3.75v18l-6-4.5-6 4.5v-18Z"/></svg>
+                    </div>
+                    <p style="font-size:1.25rem; font-weight:600; color:var(--color-text); margin-bottom:0.5rem;">Nothing saved yet</p>
+                    <p style="color:var(--color-text-muted); font-size:0.9375rem; margin-bottom:1.5rem;">Bookmark images from your search results to see them here.</p>
+                    <button type="button" onclick="switchView('search')" style="padding:0.625rem 1.5rem; border-radius:9999px; background:var(--color-accent-gradient); color:white; border:none; font-weight:600; font-size:0.875rem; cursor:pointer; box-shadow:0 4px 15px rgba(0,212,255,0.3);">Go to Search</button>
+                </div>
+
+                <!-- Favourites Grid -->
+                <div id="favoritesGrid" class="hidden" style="display:none; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem;"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <span>VisionSeek</span> &nbsp;·&nbsp; Powered by OpenCLIP + FAISS
+    </footer>
+
+    <script>
+        const searchForm = document.getElementById("searchForm");
+        const queryInput = document.getElementById("queryInput");
+        const clearBtn = document.getElementById("clearBtn");
+        const multimodalForm = document.getElementById("multimodalForm");
+        const multimodalStatus = document.getElementById("multimodalStatus");
+        const multimodalCount = document.getElementById("multimodalCount");
+        const multimodalEmpty = document.getElementById("multimodalResultsEmpty");
+        const multimodalGrid = document.getElementById("multimodalResultsGrid");
+        const mainResultsGrid = document.getElementById("mainResultsGrid");
+        const mainResultsCount = document.getElementById("mainResultsCount");
+        const refineToggleBtn = document.getElementById("refineToggleBtn");
+        const reSearchBtn = document.getElementById("reSearchBtn");
+        const categoryFilterRow = document.getElementById("categoryFilterRow");
+        const refineSummary = document.getElementById("refineSummary");
+        const refineStatus = document.getElementById("refineStatus");
+        const adminUploadForm = document.getElementById("adminUploadForm");
+        const adminImagesInput = document.getElementById("adminImagesInput");
+        const adminTokenInput = document.getElementById("adminTokenInput");
+        const adminUploadBtn = document.getElementById("adminUploadBtn");
+        const adminUploadStatus = document.getElementById("adminUploadStatus");
+
+        const relevantPaths = new Set();
+        const irrelevantPaths = new Set();
+        let refineModeActive = false;
+        let activeCategory = "All";
+        let lastQueryText = (queryInput?.value || "").trim() || sessionStorage.getItem("visionseek:lastQuery") || "";
+        let currentMainResults = [];
+        let categoryPillListenerBound = false;
+        let currentView = "search";
+        let favorites = new Set();
+
+        const searchViewBtn = document.getElementById("searchViewBtn");
+        const favoritesViewBtn = document.getElementById("favoritesViewBtn");
+        const searchView = document.getElementById("searchView");
+        const favoritesView = document.getElementById("favoritesView");
+        const favoritesContainer = document.getElementById("favoritesContainer");
+        const favoritesEmpty = document.getElementById("favoritesEmpty");
+        const favoritesGrid = document.getElementById("favoritesGrid");
+        const toastContainer = document.getElementById("toastContainer");
+
+        // Toast notification system
+        function showToast(message, type = "info", duration = 3500) {
+            const toast = document.createElement("div");
+            const colorMap = { success: "#10b981", error: "#ef4444", info: "#00d4ff" };
+            const iconMap = { success: "✓", error: "✕", info: "i" };
+            const color = colorMap[type] || colorMap.info;
+            const icon = iconMap[type] || iconMap.info;
+
+            toast.className = "toast";
+            toast.style.setProperty("--toast-color", color);
+            toast.style.setProperty("--toast-duration", `${duration}ms`);
+            toast.innerHTML = `
+                <div class="toast-left-border"></div>
+                <div class="toast-icon">${icon}</div>
+                <span style="padding-left:0.25rem;">${message}</span>
+            `;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = "slideIn 300ms ease reverse";
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Favorites localStorage management
+        function saveFavoritesToStorage() {
+            localStorage.setItem("visionseek:favorites", JSON.stringify(Array.from(favorites)));
+        }
+
+        function loadFavoritesFromStorage() {
+            try {
+                const stored = localStorage.getItem("visionseek:favorites");
+                favorites.clear();
+                if (stored) {
+                    JSON.parse(stored).forEach(path => favorites.add(path));
+                }
+            } catch (e) {
+                favorites.clear();
+            }
+        }
+
+        function isFavorited(imagePath) {
+            return favorites.has(imagePath);
+        }
+
+        // View switching
+        function switchView(viewName) {
+            if (currentView === viewName) return;
+            
+            currentView = viewName;
+            
+            if (viewName === "search") {
+                searchView.classList.remove("hidden");
+                favoritesView.classList.add("hidden");
+                searchViewBtn.classList.add("active");
+                favoritesViewBtn.classList.remove("active");
+            } else {
+                searchView.classList.add("hidden");
+                favoritesView.classList.remove("hidden");
+                searchViewBtn.classList.remove("active");
+                favoritesViewBtn.classList.add("active");
+                renderFavoritesView();
+            }
+        }
+
+        function renderFavoritesView() {
+            const favCount = document.getElementById("favCount");
+            const favStatsBar = document.getElementById("favStatsBar");
+            const favStatsText = document.getElementById("favStatsText");
+
+            if (favCount) favCount.textContent = favorites.size > 0 ? `${favorites.size} saved` : "";
+            if (favStatsText) favStatsText.textContent = `${favorites.size} image${favorites.size !== 1 ? "s" : ""} saved`;
+
+            if (favorites.size === 0) {
+                favoritesEmpty.classList.remove("hidden");
+                favoritesGrid.classList.add("hidden");
+                favoritesGrid.style.display = "none";
+                if (favStatsBar) favStatsBar.classList.add("hidden");
+                return;
+            }
+
+            favoritesEmpty.classList.add("hidden");
+            favoritesGrid.classList.remove("hidden");
+            favoritesGrid.style.display = "grid";
+            if (favStatsBar) favStatsBar.classList.remove("hidden");
+
+            favoritesGrid.innerHTML = "";
+
+            Array.from(favorites).forEach(imagePath => {
+                const wrapper = document.createElement("div");
+                wrapper.innerHTML = buildFavoriteCard(imagePath);
+                const card = wrapper.firstElementChild;
+                if (card) {
+                    favoritesGrid.appendChild(card);
+                }
+            });
+
+            favoritesGrid.querySelectorAll(".remove-favorite-btn").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const path = btn.dataset.imagePath;
+                    const card = btn.closest("article");
+                    if (card) {
+                        card.style.transition = "transform 0.25s ease, opacity 0.25s ease";
+                        card.style.transform = "scale(0.85)";
+                        card.style.opacity = "0";
+                        setTimeout(() => removeFavoriteAndRefresh(path), 250);
+                    } else {
+                        await removeFavoriteAndRefresh(path);
+                    }
+                });
+            });
+        }
+
+        function buildFavoriteCard(imagePath) {
+            const imageUrl = `/image?path=${encodeURIComponent(imagePath)}`;
+            const safePath = escapeHtml(imagePath);
+            const safeImageUrl = escapeHtml(imageUrl);
+            const fileName = imagePath.split(/[\\/]/).pop() || imagePath;
+
+            return `
+                <article class="result-card" style="position:relative;">
+                    <div class="card-image-container">
+                        <a href="${safeImageUrl}" target="_blank" rel="noreferrer">
+                            <img src="${safeImageUrl}" alt="Saved image" onerror="this.src='/placeholder.png'">
+                        </a>
+                        <button
+                            type="button"
+                            class="remove-favorite-btn"
+                            data-image-path="${safePath}"
+                            aria-label="Remove favorite"
+                            title="Remove from favourites"
+                            style="position:absolute;top:0.6rem;right:0.6rem;width:30px;height:30px;border-radius:50%;background:rgba(8,12,20,0.85);border:1px solid rgba(239,68,68,0.5);color:var(--color-danger);display:none;align-items:center;justify-content:center;cursor:pointer;transition:all 200ms ease;z-index:20;"
+                        >
+                            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                            <span style="font-size:0.7rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;background:var(--color-accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Saved</span>
+                        </div>
+                        <p class="card-path" title="${safePath}">${escapeHtml(fileName)}</p>
+                    </div>
+                </article>
+            `;
+        }
+
+        async function removeFavoriteAndRefresh(imagePath) {
+            try {
+                const response = await fetch("/favorites/remove", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image_path: imagePath }),
+                });
+
+                if (!response.ok) {
+                    showToast("Failed to remove favorite", "error");
+                    return;
+                }
+
+                favorites.delete(imagePath);
+                saveFavoritesToStorage();
+                renderFavoritesView();
+                showToast("Removed from favourites", "success");
+                
+                // Update all favorite buttons in search results if visible
+                document.querySelectorAll(`.favorite-btn[data-image-path="${escapeHtml(imagePath)}"]`).forEach(btn => {
+                    setFavoriteButtonState(btn, false);
+                });
+            } catch (error) {
+                showToast("Failed to remove favorite", "error");
+            }
+        }
+
+        function persistLastQuery(queryText) {
+            // Wire up Clear All button
+            const clearAllFavBtn = document.getElementById("clearAllFavBtn");
+            if (clearAllFavBtn && !clearAllFavBtn._bound) {
+                clearAllFavBtn._bound = true;
+                clearAllFavBtn.addEventListener("click", async () => {
+                    if (!favorites.size) return;
+                    const paths = Array.from(favorites);
+                    for (const path of paths) {
+                        try {
+                            await fetch("/favorites/remove", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ image_path: path }),
+                            });
+                        } catch (e) {}
+                        favorites.delete(path);
+                    }
+                    saveFavoritesToStorage();
+                    renderFavoritesView();
+                    document.querySelectorAll(".favorite-btn").forEach(btn => setFavoriteButtonState(btn, false));
+                    showToast("All favourites cleared", "success");
+                });
+            }
+            const normalized = (queryText || "").trim();
+            lastQueryText = normalized;
+            sessionStorage.setItem("visionseek:lastQuery", normalized);
+            return normalized;
+        }
+
+        // Populate currentMainResults from initial server-rendered results on page load
+        function initializeCurrentResults() {
+            const cards = mainResultsGrid?.querySelectorAll("article[data-image-path]");
+            if (cards && cards.length > 0) {
+                currentMainResults = Array.from(cards).map((card) => ({
+                    image_path: card.dataset.imagePath || "",
+                    score: 0, // Score not available from server-rendered results
+                }));
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function bookmarkButtonMarkup(imagePath, isFavorite) {
+            const favoriteValue = isFavorite ? "true" : "false";
+            return `
+                <button
+                    type="button"
+                    class="favorite-btn"
+                    data-image-path="${imagePath}"
+                    data-favorite="${favoriteValue}"
+                    aria-label="Toggle favorite"
+                    title="Toggle favorite"
+                >
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" stroke-width="1.5" aria-hidden="true">
+                        <path d="M6 3.75A2.25 2.25 0 0 1 8.25 1.5h7.5A2.25 2.25 0 0 1 18 3.75v18l-6-4.5-6 4.5v-18Z"></path>
+                    </svg>
+                </button>
+            `;
+        }
+
+        function setFavoriteButtonState(button, isFavorite) {
+            button.dataset.favorite = isFavorite ? "true" : "false";
+            button.setAttribute("aria-label", isFavorite ? "Remove favorite" : "Add favorite");
+            button.setAttribute("title", isFavorite ? "Remove favorite" : "Add favorite");
+        }
+
+        function categoryPillMarkup(label, isActive) {
+            const activeClass = isActive ? "active" : "";
+
+            return `
+                <button
+                    type="button"
+                    class="category-pill ${activeClass}"
+                    data-category="${escapeHtml(label)}"
+                    aria-pressed="${isActive ? "true" : "false"}"
+                >
+                    ${escapeHtml(label)}
+                </button>
+            `;
+        }
+
+        function setActiveCategory(category) {
+            activeCategory = category || "All";
+
+            if (!categoryFilterRow) {
+                return;
+            }
+
+            categoryFilterRow.querySelectorAll(".category-pill").forEach((button) => {
+                const isActive = button.dataset.category === activeCategory;
+                button.classList.toggle("active", isActive);
+                button.setAttribute("aria-pressed", isActive ? "true" : "false");
+            });
+        }
+
+        async function loadCategoryFilters() {
+            if (!categoryFilterRow) {
+                return;
+            }
+
+            try {
+                const response = await fetch("/categories");
+                const payload = await response.json();
+                const categories = Array.isArray(payload.categories) ? payload.categories : [];
+
+                categoryFilterRow.innerHTML = [
+                    categoryPillMarkup("All", true),
+                    ...categories.map((category) => categoryPillMarkup(category, false)),
+                ].join("");
+
+                setActiveCategory("All");
+            } catch (error) {
+                categoryFilterRow.innerHTML = categoryPillMarkup("All", true);
+                setActiveCategory("All");
+            }
+        }
+
+        function normalizeSearchResult(rawItem) {
+            const item = rawItem || {};
+            const rawPath = item.image_path || item.relative_path || item.image || "";
+            const imageUrl = item.image_url || (typeof rawPath === "string" && rawPath.startsWith("/dataset/") ? rawPath : "");
+            const scoreNumber = Number(item.score);
+            const scorePercent = Number.isFinite(scoreNumber)
+                ? Math.max(0, Math.min(100, scoreNumber <= 1 ? scoreNumber * 100 : scoreNumber))
+                : 0;
+
+            return {
+                ...item,
+                image_path: rawPath,
+                image_url: imageUrl,
+                score: scorePercent,
+                score_percent: item.score_percent || `${scorePercent.toFixed(1)}%`,
+            };
+        }
+
+        async function runCategorySearch(category) {
+            const queryToRun = persistLastQuery(lastQueryText || (queryInput?.value || ""));
+            if (!queryToRun) {
+                return;
+            }
+
+            const queryUrl = new URL("/search", window.location.origin);
+            queryUrl.searchParams.set("query", queryToRun);
+
+            if (category && category !== "All") {
+                queryUrl.searchParams.set("category", category);
+            }
+
+            try {
+                const response = await fetch(queryUrl.toString());
+                const payload = await response.json();
+                const normalizedResults = Array.isArray(payload.results)
+                    ? payload.results.map((item) => normalizeSearchResult(item))
+                    : [];
+                renderMainResults(normalizedResults);
+                setActiveCategory(category || "All");
+            } catch (error) {
+                if (mainResultsCount) {
+                    mainResultsCount.textContent = "Unable to filter results";
+                }
+            }
+        }
+
+        function bindCategoryPillListener() {
+            if (!categoryFilterRow || categoryPillListenerBound) {
+                return;
+            }
+
+            categoryFilterRow.addEventListener("click", async (event) => {
+                const button = event.target.closest(".category-pill");
+                if (!button) {
+                    return;
+                }
+
+                const category = button.dataset.category || "All";
+                await runCategorySearch(category);
+            });
+            categoryPillListenerBound = true;
+        }
+
+        document.querySelectorAll(".favorite-btn").forEach((button) => {
+            setFavoriteButtonState(button, button.dataset.favorite === "true");
+        });
+
+        function buildMainResultCard(item) {
+            const imagePath = item.image_path || "";
+            const isFav = isFavorited(imagePath);
+            const favoriteValue = isFav ? "true" : "false";
+            const safePath = escapeHtml(imagePath);
+            const safeImageUrl = escapeHtml(item.image_url || "");
+            const safeScore = escapeHtml(item.score_percent || "0.0%");
+            const scoreValue = Number.isFinite(Number(item.score)) ? Number(item.score) : parseFloat(safeScore) || 0;
+
+            return `
+                <article class="result-card" data-image-path="${safePath}">
+                    <div class="card-image-container">
+                        <a href="${safeImageUrl}" target="_blank" rel="noreferrer">
+                            <img src="${safeImageUrl}" alt="Search result" onerror="this.src='/placeholder.png'">
+                        </a>
+                        <div class="similarity-badge">${safeScore}</div>
+                        <div class="bookmark-btn-container">
+                            ${bookmarkButtonMarkup(safePath, favoriteValue === "true")}
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="similarity-section">
+                            <div>
+                                <div class="similarity-label">Similarity</div>
+                                <div class="similarity-value">${safeScore}</div>
+                                <div class="similarity-match-label">match</div>
+                            </div>
+                        </div>
+                        <p class="card-path" title="${safePath}">${safePath}</p>
+                        <div class="feedback-controls hidden">
+                            <button type="button" class="feedback-btn" data-feedback="relevant" data-selected="false" aria-label="Mark relevant" title="Mark relevant">👍</button>
+                            <button type="button" class="feedback-btn" data-feedback="irrelevant" data-selected="false" aria-label="Mark irrelevant" title="Mark irrelevant">👎</button>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function updateRefineSummary() {
+            if (!refineSummary) {
+                return;
+            }
+            refineSummary.innerHTML = `
+                <span style="padding:0.25rem 0.75rem;border-radius:9999px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#10b981;font-size:0.8125rem;font-weight:600;">✓ Relevant: ${relevantPaths.size}</span>
+                <span style="padding:0.25rem 0.75rem;border-radius:9999px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;font-size:0.8125rem;font-weight:600;">✕ Irrelevant: ${irrelevantPaths.size}</span>
+            `;
+            if (reSearchBtn) {
+                const hasFeedback = relevantPaths.size > 0 || irrelevantPaths.size > 0;
+                reSearchBtn.disabled = !hasFeedback;
+                reSearchBtn.classList.toggle("has-feedback", hasFeedback);
+            }
+        }
+
+        function setRefineToggleVisibility(hasResults) {
+            if (!refineToggleBtn) {
+                return;
+            }
+            refineToggleBtn.classList.toggle("hidden", !hasResults);
+        }
+
+        function resetRefineSelections() {
+            relevantPaths.clear();
+            irrelevantPaths.clear();
+            updateRefineSummary();
+        }
+
+        function syncFeedbackStateOnCard(card) {
+            const imagePath = card.dataset.imagePath;
+            const relevantBtn = card.querySelector('[data-feedback="relevant"]');
+            const irrelevantBtn = card.querySelector('[data-feedback="irrelevant"]');
+
+            if (!relevantBtn || !irrelevantBtn || !imagePath) {
+                return;
+            }
+
+            relevantBtn.dataset.selected = relevantPaths.has(imagePath) ? "true" : "false";
+            irrelevantBtn.dataset.selected = irrelevantPaths.has(imagePath) ? "true" : "false";
+        }
+
+        function applyRefineModeToCards() {
+            if (!mainResultsGrid) {
+                return;
+            }
+
+            mainResultsGrid.querySelectorAll(".feedback-controls").forEach((controls) => {
+                controls.classList.toggle("hidden", !refineModeActive);
+            });
+
+            mainResultsGrid.querySelectorAll("article[data-image-path]").forEach((card) => {
+                syncFeedbackStateOnCard(card);
+            });
+        }
+
+        function renderMainResults(results) {
+            if (!mainResultsGrid) {
+                return;
+            }
+            // keep a copy of the current results for export actions
+            currentMainResults = Array.isArray(results) ? results.map(r => ({
+                image_path: r.image_path || r.relative_path || r.image || "",
+                score: (r.score !== undefined && r.score !== null) ? Number(r.score) : (r.similarity !== undefined ? Number(r.similarity) : 0)
+            })) : [];
+
+            mainResultsGrid.innerHTML = "";
+
+            if (!Array.isArray(results) || results.length === 0) {
+                refineModeActive = false;
+                setRefineToggleVisibility(false);
+                resetRefineSelections();
+                if (mainResultsCount) {
+                    mainResultsCount.textContent = "0 matches";
+                }
+                return;
+            }
+
+            setRefineToggleVisibility(true);
+
+            if (mainResultsCount) {
+                mainResultsCount.textContent = `${results.length} matches`;
+            }
+
+            results.forEach((item) => {
+                const wrapper = document.createElement("div");
+                wrapper.innerHTML = buildMainResultCard(item);
+                const card = wrapper.firstElementChild;
+                if (card) {
+                    mainResultsGrid.appendChild(card);
+                }
+            });
+
+            mainResultsGrid.querySelectorAll(".favorite-btn").forEach((button) => {
+                setFavoriteButtonState(button, button.dataset.favorite === "true");
+            });
+
+            applyRefineModeToCards();
+        }
+
+        async function postAndDownload(url, payload, filename) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    alert(err.error || 'Export failed');
+                    return;
+                }
+
+                const blob = await response.blob();
+                const urlObj = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = urlObj;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(urlObj);
+            } catch (e) {
+                alert('Export failed');
+            }
+        }
+
+        const downloadZipBtn = document.getElementById('downloadZipBtn');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+
+        if (downloadZipBtn) {
+            downloadZipBtn.addEventListener('click', async () => {
+                if (!Array.isArray(currentMainResults) || currentMainResults.length === 0) {
+                    alert('No results to export');
+                    return;
+                }
+
+                const payload = { image_paths: currentMainResults.map(r => r.image_path) };
+                await postAndDownload('/export/zip', payload, 'visionseek_results.zip');
+            });
+        }
+
+        if (exportJsonBtn) {
+            exportJsonBtn.addEventListener('click', async () => {
+                if (!Array.isArray(currentMainResults) || currentMainResults.length === 0) {
+                    alert('No results to export');
+                    return;
+                }
+
+                const payload = {
+                    image_paths: currentMainResults.map(r => r.image_path),
+                    query: lastQueryText || (queryInput?.value || '').trim()
+                };
+
+                await postAndDownload('/export/json', payload, 'results.json');
+            });
+        }
+
+        if (searchForm) {
+            searchForm.addEventListener("submit", () => {
+                persistLastQuery(queryInput?.value || "");
+            });
+        }
+
+        clearBtn.addEventListener("click", () => {
+            queryInput.value = "";
+            window.location.href = "/";
+        });
+
+        function renderMultimodalResults(results) {
+            multimodalGrid.innerHTML = "";
+
+            if (!results.length) {
+                multimodalCount.textContent = "0 matches";
+                multimodalEmpty.classList.remove("hidden");
+                multimodalGrid.classList.add("hidden");
+                return;
+            }
+
+            multimodalCount.textContent = `${results.length} matches`;
+            multimodalEmpty.classList.add("hidden");
+            multimodalGrid.classList.remove("hidden");
+
+            results.forEach((item) => {
+                const article = document.createElement("article");
+                article.className = "result-card";
+                article.dataset.imagePath = item.image_path || "";
+                
+                const scoreText = item.score_percent || "0.0%";
+                const scoreValue = Number.isFinite(Number(item.score)) ? Number(item.score) : parseFloat(scoreText) || 0;
+                const imagePath = item.image_path || "";
+                const isFav = isFavorited(imagePath);
+
+                article.innerHTML = `
+                    <div class="card-image-container">
+                        <a href="${escapeHtml(item.image_url || "")}" target="_blank" rel="noreferrer">
+                            <img src="${escapeHtml(item.image_url || "")}" alt="Search result" onerror="this.src='/placeholder.png'">
+                        </a>
+                        <div class="similarity-badge">${escapeHtml(scoreText)}</div>
+                        <div class="bookmark-btn-container">
+                            ${bookmarkButtonMarkup(imagePath, isFav)}
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="similarity-section">
+                            <div>
+                                <div class="similarity-label">Similarity</div>
+                                <div class="similarity-value">${escapeHtml(scoreText)}</div>
+                                <div class="similarity-match-label">match</div>
+                            </div>
+                        </div>
+                        <p class="card-path" title="${escapeHtml(imagePath)}">${escapeHtml(imagePath)}</p>
+                        <div class="feedback-controls hidden">
+                            <button type="button" class="feedback-btn" data-feedback="relevant" data-selected="false" aria-label="Mark relevant" title="Mark relevant">👍</button>
+                            <button type="button" class="feedback-btn" data-feedback="irrelevant" data-selected="false" aria-label="Mark irrelevant" title="Mark irrelevant">👎</button>
+                        </div>
+                    </div>
+                `;
+
+                multimodalGrid.appendChild(article);
+            });
+
+            multimodalGrid.querySelectorAll(".favorite-btn").forEach((button) => {
+                setFavoriteButtonState(button, button.dataset.favorite === "true");
+            });
+        }
+
+        async function toggleFavorite(button) {
+            const imagePath = button.dataset.imagePath;
+            const currentlyFavorite = button.dataset.favorite === "true";
+            const endpoint = currentlyFavorite ? "/favorites/remove" : "/favorites/add";
+
+            if (!imagePath) {
+                return;
+            }
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ image_path: imagePath }),
+                });
+
+                if (!response.ok) {
+                    showToast("Failed to update favorite", "error");
+                    return;
+                }
+
+                const newState = !currentlyFavorite;
+                setFavoriteButtonState(button, newState);
+                
+                // Update localStorage
+                if (newState) {
+                    favorites.add(imagePath);
+                    showToast("Added to favourites", "success");
+                } else {
+                    favorites.delete(imagePath);
+                    showToast("Removed from favourites", "success");
+                }
+                saveFavoritesToStorage();
+            } catch (error) {
+                showToast("Failed to update favorite", "error");
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function toggleFeedback(button) {
+            if (!refineModeActive) {
+                return;
+            }
+            const feedbackType = button.dataset.feedback;
+            const card = button.closest("article[data-image-path]");
+            const imagePath = card ? card.dataset.imagePath : "";
+
+            if (!imagePath || !feedbackType) {
+                return;
+            }
+
+            if (feedbackType === "relevant") {
+                if (relevantPaths.has(imagePath)) {
+                    relevantPaths.delete(imagePath);
+                } else {
+                    relevantPaths.add(imagePath);
+                    irrelevantPaths.delete(imagePath);
+                }
+            }
+
+            if (feedbackType === "irrelevant") {
+                if (irrelevantPaths.has(imagePath)) {
+                    irrelevantPaths.delete(imagePath);
+                } else {
+                    irrelevantPaths.add(imagePath);
+                    relevantPaths.delete(imagePath);
+                }
+            }
+
+            if (card) {
+                syncFeedbackStateOnCard(card);
+            }
+
+            updateRefineSummary();
+        }
+
+        document.addEventListener("click", (event) => {
+            const feedbackButton = event.target.closest(".feedback-btn");
+            if (feedbackButton) {
+                toggleFeedback(feedbackButton);
+                return;
+            }
+
+            const button = event.target.closest(".favorite-btn");
+            if (!button) {
+                return;
+            }
+
+            toggleFavorite(button);
+        });
+
+        if (refineToggleBtn) {
+            refineToggleBtn.addEventListener("click", () => {
+                refineModeActive = !refineModeActive;
+                refineToggleBtn.textContent = refineModeActive ? "Mark Relevant Images: On" : "Mark Relevant Images: Off";
+                refineToggleBtn.classList.toggle("on", refineModeActive);
+                refineToggleBtn.classList.toggle("off", !refineModeActive);
+                if (!refineModeActive) {
+                    resetRefineSelections();
+                }
+                applyRefineModeToCards();
+            });
+        }
+
+        if (reSearchBtn) {
+            reSearchBtn.addEventListener("click", async () => {
+                lastQueryText = queryInput.value.trim();
+                const originalQuery = lastQueryText;
+
+                if (!originalQuery) {
+                    if (refineStatus) {
+                        refineStatus.textContent = "Enter a text query before running Re-search.";
+                        refineStatus.classList.remove("hidden");
+                    }
+                    showToast("Enter a query before re-searching", "error");
+                    return;
+                }
+
+                if (relevantPaths.size === 0 && irrelevantPaths.size === 0) {
+                    if (refineStatus) {
+                        refineStatus.textContent = "Mark at least one image as relevant or irrelevant.";
+                        refineStatus.classList.remove("hidden");
+                    }
+                    showToast("Mark at least one image as relevant or irrelevant", "error");
+                    return;
+                }
+
+                if (refineStatus) {
+                    refineStatus.classList.add("hidden");
+                    refineStatus.textContent = "";
+                }
+
+                reSearchBtn.disabled = true;
+                const originalContent = reSearchBtn.innerHTML;
+                reSearchBtn.innerHTML = '<span class="spinner"></span>Re-ranking...';
+
+                try {
+                    const response = await fetch("/search/rerank", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            original_query: originalQuery,
+                            relevant_paths: Array.from(relevantPaths),
+                            irrelevant_paths: Array.from(irrelevantPaths),
+                        }),
+                    });
+
+                    const payload = await response.json();
+
+                    if (!response.ok) {
+                        const errorMsg = payload.error || "Re-search failed. Please try again.";
+                        if (refineStatus) {
+                            refineStatus.textContent = errorMsg;
+                            refineStatus.classList.remove("hidden");
+                        }
+                        showToast(errorMsg, "error");
+                        updateRefineSummary();
+                        return;
+                    }
+
+                    relevantPaths.clear();
+                    irrelevantPaths.clear();
+                    updateRefineSummary();
+                    renderMainResults(payload.results || []);
+                    showToast("Re-ranking complete! Results updated.", "success");
+                    if (refineStatus) {
+                        refineStatus.classList.add("hidden");
+                    }
+                } catch (error) {
+                    console.error("Reranking error:", error);
+                    const errorMsg = "Unable to run reranking right now. Please check your connection and try again.";
+                    if (refineStatus) {
+                        refineStatus.textContent = errorMsg;
+                        refineStatus.classList.remove("hidden");
+                    }
+                    showToast(errorMsg, "error");
+                } finally {
+                    reSearchBtn.innerHTML = originalContent;
+                    reSearchBtn.disabled = false;
+                    updateRefineSummary();
+                }
+            });
+        }
+
+        applyRefineModeToCards();
+        updateRefineSummary();
+
+        // Initialize favorites from localStorage
+        loadFavoritesFromStorage();
+
+        // Set up view toggle buttons
+        if (searchViewBtn) {
+            searchViewBtn.addEventListener("click", () => switchView("search"));
+        }
+
+        if (favoritesViewBtn) {
+            favoritesViewBtn.addEventListener("click", () => switchView("favorites"));
+        }
+
+        function setAdminStatus(message, mode) {
+            if (!adminUploadStatus) {
+                return;
+            }
+
+            adminUploadStatus.textContent = message;
+            adminUploadStatus.classList.remove("hidden", "border-red-300", "bg-red-100", "text-red-800", "border-emerald-300", "bg-emerald-100", "text-emerald-800", "border-slate-300", "bg-slate-200", "text-slate-700");
+
+            if (mode === "success") {
+                adminUploadStatus.classList.add("border-emerald-300", "bg-emerald-100", "text-emerald-800");
+                return;
+            }
+
+            if (mode === "error") {
+                adminUploadStatus.classList.add("border-red-300", "bg-red-100", "text-red-800");
+                return;
+            }
+
+            adminUploadStatus.classList.add("border-slate-300", "bg-slate-200", "text-slate-700");
+        }
+
+        if (adminUploadForm) {
+            adminUploadForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const adminToken = (adminTokenInput?.value || "").trim();
+                const files = adminImagesInput?.files;
+
+                if (!adminToken) {
+                    setAdminStatus("Admin token is required.", "error");
+                    return;
+                }
+
+                if (!files || files.length === 0) {
+                    setAdminStatus("Select at least one image to upload.", "error");
+                    return;
+                }
+
+                const formData = new FormData();
+                Array.from(files).forEach((file) => {
+                    formData.append("images[]", file);
+                });
+
+                if (adminUploadBtn) {
+                    adminUploadBtn.disabled = true;
+                }
+                setAdminStatus("Uploading images and updating index...", "info");
+
+                try {
+                    const response = await fetch("/admin/upload", {
+                        method: "POST",
+                        headers: {
+                            "X-Admin-Token": adminToken,
+                        },
+                        body: formData,
+                    });
+
+                    const payload = await response.json();
+
+                    if (response.status === 401) {
+                        setAdminStatus("Invalid admin token.", "error");
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        setAdminStatus(payload.error || "Upload failed.", "error");
+                        return;
+                    }
+
+                    const failedCount = Array.isArray(payload.failed_files) ? payload.failed_files.length : 0;
+                    setAdminStatus(`Successfully added ${payload.added_count || 0} image(s). Failed: ${failedCount}.`, "success");
+                    adminUploadForm.reset();
+                } catch (error) {
+                    setAdminStatus("Unable to upload images right now.", "error");
+                } finally {
+                    if (adminUploadBtn) {
+                        adminUploadBtn.disabled = false;
+                    }
+                }
+            });
+        }
+
+        // Initialize results from server-rendered results on page load
+        initializeCurrentResults();
+        setRefineToggleVisibility(currentMainResults.length > 0);
+        persistLastQuery(lastQueryText);
+        bindCategoryPillListener();
+        loadCategoryFilters();
+
+        multimodalForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            multimodalStatus.classList.add("hidden");
+            multimodalStatus.textContent = "";
+
+            const formData = new FormData(multimodalForm);
+
+            try {
+                const response = await fetch("/search/multimodal", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    multimodalStatus.textContent = payload.error || "Multimodal search failed.";
+                    multimodalStatus.classList.remove("hidden");
+                    renderMultimodalResults([]);
+                    return;
+                }
+
+                renderMultimodalResults(payload.results || []);
+            } catch (error) {
+                multimodalStatus.textContent = "Unable to run multimodal search right now.";
+                multimodalStatus.classList.remove("hidden");
+                renderMultimodalResults([]);
+            }
+        });
+
+        /* ========================================
+           ANIMATION INITIALIZATION & HANDLERS
+           ======================================== */
+
+        // Initialize page load animations for hero section
+        function initializeHeroAnimations() {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) return;
+
+            const heroBadge = document.querySelector(".hero-badge");
+            const heroHeading = document.querySelector(".hero-heading");
+            const heroSubtitle = document.querySelector(".hero-subtitle");
+            const heroSearchForm = document.querySelector(".hero-search-form");
+
+            // Apply animation classes
+            if (heroBadge) heroBadge.classList.add("animate");
+            if (heroHeading) heroHeading.classList.add("animate");
+            if (heroSubtitle) heroSubtitle.classList.add("animate");
+            if (heroSearchForm) heroSearchForm.classList.add("animate");
+        }
+
+        // Navbar scroll detection
+        function initializeNavbarScrollAnimation() {
+            const navbar = document.querySelector("nav.navbar");
+            if (!navbar) return;
+
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 60) {
+                    navbar.classList.add("scrolled");
+                } else {
+                    navbar.classList.remove("scrolled");
+                }
+            }, { passive: true });
+        }
+
+        // Add animations to result cards
+        function animateResultCards() {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) return;
+
+            const cards = document.querySelectorAll(".result-card");
+            cards.forEach((card, index) => {
+                card.classList.add("animate");
+                const delayClass = `animate-delay-${(index % 10) + 1}`;
+                card.classList.add(delayClass);
+            });
+        }
+
+        // Search button loading state
+        function setSearchButtonLoading(isLoading) {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            const searchBtn = searchForm?.querySelector("button[type='submit']");
+            if (!searchBtn) return;
+
+            if (isLoading) {
+                searchBtn.classList.add("loading");
+                searchBtn.disabled = true;
+                searchBtn.textContent = "Searching";
+            } else {
+                searchBtn.classList.remove("loading");
+                searchBtn.classList.remove("success");
+                searchBtn.disabled = false;
+                searchBtn.textContent = "Search";
+            }
+        }
+
+        // Show success checkmark on search button
+        function showSearchSuccess() {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) return;
+
+            const searchBtn = searchForm?.querySelector("button[type='submit']");
+            if (!searchBtn) return;
+
+            searchBtn.classList.add("success");
+            searchBtn.textContent = "Search";
+            
+            setTimeout(() => {
+                searchBtn.classList.remove("success");
+            }, 700);
+        }
+
+        // Re-search button pulse glow
+        function updateReSearchPulse() {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) return;
+
+            if (!reSearchBtn) return;
+
+            const hasRelevant = relevantPaths.size > 0 && refineModeActive;
+            if (hasRelevant) {
+                reSearchBtn.classList.add("pulse-glow");
+            } else {
+                reSearchBtn.classList.remove("pulse-glow");
+            }
+        }
+
+        // Bookmark bounce animation
+        function animateBookmarkBounce(button) {
+            const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (prefersReducedMotion) return;
+
+            button.classList.add("bounce");
+            setTimeout(() => {
+                button.classList.remove("bounce");
+            }, 300);
+        }
+
+        // Apply animations after initial search
+        const originalSearchForm = searchForm;
+        if (originalSearchForm) {
+            const originalSubmit = originalSearchForm.onsubmit;
+            searchForm.addEventListener("submit", function(e) {
+                if (!e.defaultPrevented) {
+                    setSearchButtonLoading(true);
+                    // Simulate search completion for button state
+                    setTimeout(() => {
+                        showSearchSuccess();
+                        setSearchButtonLoading(false);
+                    }, 1000);
+                }
+            }, false);
+        }
+
+        // Listen for result updates to animate cards
+        const originalRenderMainResults = window.renderMainResults || (() => {});
+        window.renderMainResults = function(results) {
+            originalRenderMainResults.call(this, results);
+            setTimeout(() => {
+                animateResultCards();
+            }, 100);
+        };
+
+        // Update favorite button animation
+        const originalToggleFavorite = window.toggleFavorite || (() => {});
+        window.toggleFavorite = async function(button) {
+            animateBookmarkBounce(button);
+            return originalToggleFavorite.call(this, button);
+        };
+
+        // Listen for feedback button clicks to update pulse
+        document.addEventListener("click", (e) => {
+            if (e.target.classList.contains("feedback-btn")) {
+                setTimeout(() => {
+                    updateReSearchPulse();
+                }, 50);
+            }
+        });
+
+        // Initialize animations on page load
+        window.addEventListener("DOMContentLoaded", () => {
+            initializeHeroAnimations();
+            initializeNavbarScrollAnimation();
+            animateResultCards();
+            updateReSearchPulse();
+        });
+
+        // Handle visibility change
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) {
+                updateReSearchPulse();
+            }
+        });
+    </script>
+</body>
+</html>
