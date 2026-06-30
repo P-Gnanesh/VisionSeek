@@ -8,6 +8,7 @@
 
 ## Table of Contents
 
+- [Contributors](#contributors)
 - [Project Overview](#project-overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
@@ -22,6 +23,12 @@
 - [Contributing](#contributing)
 - [License](#license)
 
+## Contributors
+
+- Mohammed Afshan — https://github.com/MohdAfshan
+- P Gnanesh — https://github.com/P-Gnanesh
+- Ibrahim Sharif — https://github.com/1brahimSharif
+  
 ## Project Overview
 
 VisionSeek is a semantic image search application built with Flask, OpenCLIP, and FAISS. It allows users to search an image library using natural language, a reference image, or a combined multimodal query. The backend converts images and text into shared embeddings, performs cosine-similarity search over a precomputed FAISS index, and returns ranked visual matches with interactive filtering, favorites, export, and feedback workflows.
