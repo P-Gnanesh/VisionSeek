@@ -28,6 +28,7 @@
 - Mohammed Afshan — https://github.com/MohdAfshan
 - P Gnanesh — https://github.com/P-Gnanesh
 - Ibrahim Sharif — https://github.com/1brahimSharif
+- Namitha R — https://github.com/namitha2526
   
 ## Project Overview
 
